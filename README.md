@@ -8,10 +8,9 @@ An R-based pipeline for analyzing Open Field Test (OFT) behavioral data from Dee
 - **OFT_Main.R** - Configuration and execution script
 
 ```
+1. Place `DLCAnalyzer_Functions_final.R` in your R code directory
 
-3. Place `DLCAnalyzer_Functions_final.R` in your R code directory
-
-4. Update file paths in `OFT_Main.R`:
+2. Update file paths in `OFT_Main.R`:
 ```r
 source("path/to/DLCAnalyzer_Functions_final.R")
 source("path/to/OFT_Analysis_Pipeline.R")
