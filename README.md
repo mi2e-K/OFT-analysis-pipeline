@@ -3,17 +3,17 @@
 An R-based pipeline for analyzing Open Field Test (OFT) behavioral data from DeepLabCut tracking output.
 
 ### Required Files
-- **DLCAnalyzer_Functions_final_v7.R** - Core DLCAnalyzer functions
+- **DLCAnalyzer_Functions_final.R** - Core DLCAnalyzer functions (download from [ETHZ-INS/DLCAnalyzer](https://github.com/ETHZ-INS/DLCAnalyzer))
 - **OFT_Analysis_Pipeline.R** - Main analysis functions
 - **OFT_Main.R** - Configuration and execution script
 
 ```
 
-3. Place `DLCAnalyzer_Functions_final_v7.R` in your R code directory
+3. Place `DLCAnalyzer_Functions_final.R` in your R code directory
 
 4. Update file paths in `OFT_Main.R`:
 ```r
-source("path/to/DLCAnalyzer_Functions_final_v7.R")
+source("path/to/DLCAnalyzer_Functions_final.R")
 source("path/to/OFT_Analysis_Pipeline.R")
 setwd("path/to/your/data")
 ```
@@ -67,74 +67,72 @@ Per-minute breakdown of distance traveled and zone occupancy
 
 ## Behavioral Metrics
 
-The Combined_Results.csv file contains comprehensive behavioral metrics from the Open Field Test analysis. Each row represents one subject/video file.
-Metric Descriptions
-Basic Information
+The `Combined_Results.csv` file contains comprehensive behavioral metrics from the Open Field Test analysis. Each row represents one subject/video file.
 
-ID: Subject/file identifier (extracted from filename)
-Duration_min: Total recording duration in minutes
+### Metric Descriptions
 
-General Locomotion Metrics
+#### Basic Information
 
-Total_Distance_cm: Total distance traveled during the entire session (cm)
-Distance_Moving_cm: Distance traveled only during movement periods (cm)
-Average_Speed_cm_s: Mean speed across entire session including stationary periods (cm/s)
-Speed_Moving_cm_s: Mean speed calculated only during movement periods (cm/s)
-Time_Moving_s: Total time spent in motion (seconds)
-Time_Stationary_s: Total time spent stationary/immobile (seconds)
-Percent_Moving: Percentage of session time spent moving (%)
+- **ID**: Subject/file identifier (extracted from filename)
+- **Duration_min**: Total recording duration in minutes
 
-Center Zone Metrics
-The center zone typically represents 36% of the arena area (60% × 60% of dimensions)
+#### General Locomotion Metrics
 
-Center_Time_s: Total time spent in the center zone (seconds)
-Center_Distance_cm: Distance traveled within the center zone (cm)
-Center_Transitions: Number of entries into the center zone (count)
-Center_Percent: Percentage of total time spent in center zone (%)
+- **Total_Distance_cm**: Total distance traveled during the entire session (cm)
+- **Distance_Moving_cm**: Distance traveled only during movement periods (cm)
+- **Average_Speed_cm_s**: Mean speed across entire session including stationary periods (cm/s)
+- **Speed_Moving_cm_s**: Mean speed calculated only during movement periods (cm/s)
+- **Time_Moving_s**: Total time spent in motion (seconds)
+- **Time_Stationary_s**: Total time spent stationary/immobile (seconds)
+- **Percent_Moving**: Percentage of session time spent moving (%)
 
-Periphery Zone Metrics
-The periphery is the outer ring of the arena, excluding corners
+#### Center Zone Metrics
 
-Periphery_Time_s: Total time spent in the periphery zone (seconds)
-Periphery_Distance_cm: Distance traveled within the periphery zone (cm)
-Periphery_Transitions: Number of entries into the periphery zone (count)
-Periphery_Percent: Percentage of total time spent in periphery zone (%)
+*The center zone typically represents 36% of the arena area (60% × 60% of dimensions)*
 
-Corner Zone Metrics
-The four corner regions of the arena
+- **Center_Time_s**: Total time spent in the center zone (seconds)
+- **Center_Distance_cm**: Distance traveled within the center zone (cm)
+- **Center_Transitions**: Number of entries into the center zone (count)
+- **Center_Percent**: Percentage of total time spent in center zone (%)
 
-Corners_Time_s: Total time spent in all corner zones combined (seconds)
-Corners_Distance_cm: Distance traveled within corner zones (cm)
-Corners_Transitions: Number of entries into corner zones (count)
-Corners_Percent: Percentage of total time spent in corners (%)
+#### Periphery Zone Metrics
 
-Anxiety-Related Indices
+*The periphery is the outer ring of the arena, excluding corners*
 
-Center_Periphery_Ratio: Ratio of center time to periphery time (higher = less anxious behavior)
-Thigmotaxis_Index: Wall-hugging behavior index; periphery time/(center + periphery time) (0-1 scale; higher = more thigmotactic/anxious behavior)
+- **Periphery_Time_s**: Total time spent in the periphery zone (seconds)
+- **Periphery_Distance_cm**: Distance traveled within the periphery zone (cm)
+- **Periphery_Transitions**: Number of entries into the periphery zone (count)
+- **Periphery_Percent**: Percentage of total time spent in periphery zone (%)
 
-Interpretation Notes
-Anxiety Assessment
+#### Corner Zone Metrics
 
-Lower anxiety indicators: Higher center time/transitions, higher Center_Periphery_Ratio, lower Thigmotaxis_Index
-Higher anxiety indicators: More time in periphery/corners, fewer center entries, higher Thigmotaxis_Index
+*The four corner regions of the arena*
 
-Movement Analysis
+- **Corners_Time_s**: Total time spent in all corner zones combined (seconds)
+- **Corners_Distance_cm**: Distance traveled within corner zones (cm)
+- **Corners_Transitions**: Number of entries into corner zones (count)
+- **Corners_Percent**: Percentage of total time spent in corners (%)
 
-Hyperactivity: High Total_Distance, high Percent_Moving
-Hypoactivity: Low Total_Distance, high Time_Stationary
-Movement efficiency: Compare Speed_Moving to Average_Speed
+#### Anxiety-Related Indices
 
-Zone Preferences
+- **Center_Periphery_Ratio**: Ratio of center time to periphery time (higher = less anxious behavior)
+- **Thigmotaxis_Index**: Wall-hugging behavior index; periphery time/(center + periphery time) (0-1 scale; higher = more thigmotactic/anxious behavior)
 
-Exploration: Balanced time across zones with multiple transitions
-Avoidance: Minimal center time with few transitions
-Thigmotaxis: High periphery/corner time with minimal center exploration
+### Configuration Dependencies
 
-Configuration Dependencies
 These metrics are calculated based on your config settings:
 
-movement_cutoff: Threshold for determining movement vs. stationary (default: 3 cm/s)
-center_scale: Size of center zone (default: 0.6 = 60% of arena width/height)
-periphery_scale: Size of periphery boundary (default: 0.8)
-corner_scale: Size of corner zones (default: 0.25)
+- **movement_cutoff**: Threshold for determining movement vs. stationary (default: 3 cm/s)
+- **center_scale**: Size of center zone (default: 0.6 = 60% of arena width/height)
+- **periphery_scale**: Size of periphery boundary (default: 0.8)
+- **corner_scale**: Size of corner zones (default: 0.25)
+
+## License
+- OFT Analysis Pipeline (this repository): MIT License
+- Required dependency (DLCAnalyzer): GPL-3.0 License
+
+## Citation
+
+If you use this pipeline, please cite:
+- [DeepLabCut](http://www.mackenziemathislab.org/deeplabcut): Mathis et al. (2018)
+- [DLCAnalyzer](https://github.com/ETHZ-INS/DLCAnalyzer)
