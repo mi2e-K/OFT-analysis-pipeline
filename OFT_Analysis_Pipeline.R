@@ -9,7 +9,40 @@ library(cowplot)
 library(stringr)
 library(paletteer)
 library(tools)
-library(svglite)  # Add for SVG support
+library(svglite)
+
+################################################################################
+#### HELPER FUNCTIONS ####
+################################################################################
+
+verify_merged_file <- function(file_path) {
+  # Quick verification that the merged file has both body parts and corners
+  
+  if (!file.exists(file_path)) {
+    cat("  ✗ File not found:", file_path, "\n")
+    return(FALSE)
+  }
+  
+  lines <- readLines(file_path, n = 3)
+  header2 <- strsplit(lines[2], ",")[[1]]
+  
+  # Check for body parts
+  has_body <- any(grepl("nose|body|tail", header2, ignore.case = TRUE))
+  
+  # Check for corners
+  has_corners <- any(grepl("top|bottom|Left|Right|corner", header2, ignore.case = TRUE))
+  
+  if (has_body && has_corners) {
+    cat("  ✓ Verification passed: Found both body parts and corners\n")
+    return(TRUE)
+  } else {
+    cat("  ✗ Verification failed: Missing", 
+        ifelse(!has_body, "body parts", ""),
+        ifelse(!has_body && !has_corners, "and", ""),
+        ifelse(!has_corners, "corners", ""), "\n")
+    return(FALSE)
+  }
+}
 
 ################################################################################
 #### STEP 1: DATA MERGING FUNCTIONS ####
@@ -122,8 +155,29 @@ merge_tracking_and_annotation <- function(tracking_file, annotation_file, output
   
   # Save merged file in tracking_csv directory
   if (is.null(output_file)) {
-    output_file <- file.path(output_dir, gsub(".*DLC", "", basename(tracking_file)))
-    output_file <- gsub("_filtered\\.csv", "_tracking.csv", output_file)
+    # Extract base filename
+    base_name <- basename(tracking_file)
+    
+    # Extract ID based on DLC pattern
+    if (grepl("DLC", base_name)) {
+      # For files like "C1-PDLC_resnet152_..._filtered.csv"
+      # Extract everything before "DLC"
+      id_part <- sub("DLC.*", "", base_name)
+      # Remove any trailing separators
+      id_part <- gsub("[-_]+$", "", id_part)
+      
+      if (nchar(id_part) > 0) {
+        output_file <- file.path(output_dir, paste0(id_part, "_tracking.csv"))
+      } else {
+        # If no ID before DLC, use full cleaned filename
+        output_file <- file.path(output_dir, 
+                                 gsub("_filtered\\.csv$", "_tracking.csv", base_name))
+      }
+    } else {
+      # For files without DLC, just replace _filtered with _tracking
+      output_file <- file.path(output_dir, 
+                               gsub("_filtered\\.csv$", "_tracking.csv", base_name))
+    }
   } else {
     output_file <- file.path(output_dir, output_file)
   }
@@ -227,8 +281,29 @@ fix_and_merge_files <- function(tracking_file, annotation_file, output_file = NU
   
   # Save the cleaned and merged file in tracking_csv directory
   if (is.null(output_file)) {
-    output_file <- file.path(output_dir, gsub(".*DLC", "", basename(tracking_file)))
-    output_file <- gsub("_filtered\\.csv", "_tracking.csv", output_file)
+    # Extract base filename
+    base_name <- basename(tracking_file)
+    
+    # Extract ID based on DLC pattern
+    if (grepl("DLC", base_name)) {
+      # For files like "C1-PDLC_resnet152_..._filtered.csv"
+      # Extract everything before "DLC"
+      id_part <- sub("DLC.*", "", base_name)
+      # Remove any trailing separators
+      id_part <- gsub("[-_]+$", "", id_part)
+      
+      if (nchar(id_part) > 0) {
+        output_file <- file.path(output_dir, paste0(id_part, "_tracking.csv"))
+      } else {
+        # If no ID before DLC, use full cleaned filename
+        output_file <- file.path(output_dir, 
+                                 gsub("_filtered\\.csv$", "_tracking.csv", base_name))
+      }
+    } else {
+      # For files without DLC, just replace _filtered with _tracking
+      output_file <- file.path(output_dir, 
+                               gsub("_filtered\\.csv$", "_tracking.csv", base_name))
+    }
   } else {
     output_file <- file.path(output_dir, output_file)
   }
@@ -290,7 +365,7 @@ correct_arena_tilt <- function(t, corner_points = NULL) {
   cat("    Detected tilt angle:", round(angle_deg, 2), "degrees\n")
   
   # Apply rotation if tilt is significant (> 1 degree)
-  if (abs(angle_deg) > 0.3) {
+  if (abs(angle_deg) > .3) {
     # Rotate the tracking data to correct the tilt
     t <- RotateTrackingData(t, theta = -angle_deg, center.of = corner_points)
     cat("    Applied rotation correction\n")
@@ -309,8 +384,9 @@ analyze_single_OFT <- function(tracking_file, config, output_dir = NULL) {
   # Complete OFT analysis for a single file
   
   # Extract file ID
-  file_id <- gsub("_tracking.*", "", basename(tracking_file))
-  file_id <- gsub("DLC.*", "", file_id)
+  file_id <- basename(tracking_file)
+  file_id <- gsub("_tracking\\.csv$", "", file_id)
+  file_id <- trimws(file_id)
   
   cat("\nAnalyzing:", file_id, "\n")
   
@@ -675,9 +751,21 @@ process_OFT_batch <- function(config) {
     merged_files <- c()
     
     for (tracking_file in tracking_files) {
+      # Extract file ID more carefully
       file_id <- basename(tracking_file)
-      file_id <- gsub("DLC.*", "", file_id)
+      
+      # Handle DLC naming pattern
+      if (grepl("DLC", file_id)) {
+        file_id <- sub("DLC.*", "", file_id)
+      } else {
+        file_id <- gsub("_filtered\\.csv$", "", file_id)
+      }
+      
+      # Clean up any trailing separators
+      file_id <- gsub("[-_]+$", "", file_id)
       file_id <- trimws(file_id)
+      
+      cat("  Processing file ID:", file_id, "\n")
       
       # Find annotation file
       anno_patterns <- c(
@@ -720,9 +808,9 @@ process_OFT_batch <- function(config) {
       
       tracking_file <- tracking_files[i]
       
-      # Extract ID
+      # Extract ID more carefully
       file_id <- basename(tracking_file)
-      file_id <- gsub("_tracking.*", "", file_id)
+      file_id <- gsub("_tracking\\.csv$", "", file_id)
       file_id <- trimws(file_id)
       
       cat("\n[", i, "/", length(tracking_files), "] Processing:", file_id, "\n")
