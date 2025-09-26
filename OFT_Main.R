@@ -1,7 +1,7 @@
-source(r"(H:\OFT\DLCAnalyzer_Functions_final_v7.R)")
-source(r"(H:\OFT\OFT_Analysis_Pipeline.R)")
+source(r"(C:\your_path\DLCAnalyzer_Functions_final.R)")
+source(r"(D:\your_path\OFT_Analysis_Pipeline.R)")
 
-setwd(r"(H:\OFT\honli)")
+setwd(r"(C:\your_path\)")
 
 config <- list(
   # Directories
@@ -32,7 +32,7 @@ config <- list(
   save_plots = TRUE,          # Save trajectory plots
   plot_dpi = 300,             # Plot resolution
   analyze_temporal = TRUE,    # Perform per-minute analysis
-  skip_merging = TRUE,        # Skip merging step if TRUE (use existing tracking files)
+  skip_merging = FALSE,        # Skip merging step if TRUE (use existing tracking files)
   correct_arena_tilt = TRUE,  # Automatically correct arena tilt
   color_path_by_speed = FALSE,
   debug_mode = FALSE,          # Additional debug outputs
